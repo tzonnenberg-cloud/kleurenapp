@@ -1,324 +1,158 @@
 import React, { useMemo, useState } from "react";
 
-type Kleur = {
-  naam: string;
-  hex: string;
-  groep: "warm" | "koud";
-};
-
-type Ronde = {
-  opties: Kleur[];
-  juisteIds: string[];
-};
-
-const KLEUR_POOL: Kleur[] = [
-  { naam: "Rood", hex: "#e53935", groep: "warm" },
-  { naam: "Oranje", hex: "#fb8c00", groep: "warm" },
-  { naam: "Geel", hex: "#fdd835", groep: "warm" },
-  { naam: "Koraal", hex: "#ff6f61", groep: "warm" },
-  { naam: "Zalm", hex: "#ff8a65", groep: "warm" },
-  { naam: "Bordeaux", hex: "#8e244d", groep: "warm" },
-  { naam: "Terracotta", hex: "#d96c47", groep: "warm" },
-  { naam: "Roze", hex: "#ec407a", groep: "warm" },
-  { naam: "Blauw", hex: "#1e88e5", groep: "koud" },
-  { naam: "Turquoise", hex: "#26c6da", groep: "koud" },
-  { naam: "Groen", hex: "#43a047", groep: "koud" },
-  { naam: "Mint", hex: "#66bb6a", groep: "koud" },
-  { naam: "Paars", hex: "#7e57c2", groep: "koud" },
-  { naam: "Indigo", hex: "#3949ab", groep: "koud" },
-  { naam: "Petrol", hex: "#00897b", groep: "koud" },
-  { naam: "Lichtblauw", hex: "#4fc3f7", groep: "koud" },
+const questions = [
+  {
+    id: 1,
+    question: "In welk land werd Napoleon Bonaparte geboren?",
+    answers: ["frankrijk", "corsica", "frankrijk (corsica)", "corsica (frankrijk)"],
+    correctLabel: "Frankrijk / Corsica",
+    feedback:
+      "Napoleon werd geboren op Corsica. Dat eiland was kort daarvoor Frans geworden. Daarom zijn zowel ‘Corsica’ als ‘Frankrijk’ meestal goed te rekenen.",
+  },
+  {
+    id: 2,
+    question:
+      "Welke belangrijke militaire overwinning behaalde Napoleon in 1805 tegen Oostenrijk en Rusland?",
+    answers: ["slag bij austerlitz", "austerlitz"],
+    correctLabel: "Slag bij Austerlitz",
+    feedback:
+      "De Slag bij Austerlitz was een van Napoleons grootste overwinningen. Deze slag staat ook bekend als de Slag der Drie Keizers.",
+  },
+  {
+    id: 3,
+    question: "Wat was de naam van het wetboek dat Napoleon invoerde?",
+    answers: ["code napoléon", "code napoleon", "burgerlijk wetboek"],
+    correctLabel: "Code Napoléon / Burgerlijk Wetboek",
+    feedback:
+      "De Code Napoléon werd een invloedrijk wetboek in Europa. Ook ‘Burgerlijk Wetboek’ is hier een goed antwoord.",
+  },
+  {
+    id: 4,
+    question: "Naar welk eiland werd Napoleon voor het eerst verbannen?",
+    answers: ["elba"],
+    correctLabel: "Elba",
+    feedback:
+      "Napoleon werd in 1814 verbannen naar Elba. Later keerde hij nog kort terug aan de macht.",
+  },
+  {
+    id: 5,
+    question: "In welk jaar vond de Slag bij Waterloo plaats?",
+    answers: ["1815"],
+    correctLabel: "1815",
+    feedback:
+      "De Slag bij Waterloo vond plaats in 1815 en betekende Napoleons definitieve nederlaag.",
+  },
 ];
 
-function shuffle<T>(array: T[]): T[] {
-  const kopie = [...array];
-  for (let i = kopie.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [kopie[i], kopie[j]] = [kopie[j], kopie[i]];
-  }
-  return kopie;
-}
-
-function kiesUnieke<T>(array: T[], aantal: number): T[] {
-  return shuffle(array).slice(0, aantal);
-}
-
-function maakRonde(): Ronde {
-  const warm = KLEUR_POOL.filter((kleur) => kleur.groep === "warm");
-  const koud = KLEUR_POOL.filter((kleur) => kleur.groep === "koud");
-
-  const contrasterendWarm = kiesUnieke(warm, 1)[0];
-  const contrasterendKoud = kiesUnieke(koud, 1)[0];
-  const overigeWarm = kiesUnieke(
-    warm.filter((kleur) => kleur.naam !== contrasterendWarm.naam),
-    3,
+export default function NapoleonQuizApp() {
+  const [answers, setAnswers] = useState(() =>
+    Object.fromEntries(questions.map((q) => [q.id, ""]))
   );
+  const [checked, setChecked] = useState(false);
 
-  return {
-    opties: shuffle([contrasterendWarm, contrasterendKoud, ...overigeWarm]),
-    juisteIds: [contrasterendWarm.naam, contrasterendKoud.naam],
-  };
-}
-
-function tekstKleur(hex: string): string {
-  const schoon = hex.replace("#", "");
-  const r = parseInt(schoon.substring(0, 2), 16);
-  const g = parseInt(schoon.substring(2, 4), 16);
-  const b = parseInt(schoon.substring(4, 6), 16);
-  const helderheid = (r * 299 + g * 587 + b * 114) / 1000;
-  return helderheid > 150 ? "#111827" : "#ffffff";
-}
-
-function WielLabel({ style, children }: { style: React.CSSProperties; children: React.ReactNode }) {
-  return (
-    <span
-      className="absolute z-10 -translate-x-1/2 -translate-y-1/2 text-center text-[11px] font-bold leading-none max-w-[74px]"
-      style={style}
-    >
-      {children}
-    </span>
-  );
-}
-
-export default function KleurContrastTrainerApp() {
-  const [ronde, setRonde] = useState<Ronde>(() => maakRonde());
-  const [selecties, setSelecties] = useState<string[]>([]);
-  const [feedback, setFeedback] = useState<string>("");
-  const [streak, setStreak] = useState<number>(0);
-  const [rondenGespeeld, setRondenGespeeld] = useState<number>(1);
-  const [voltooid, setVoltooid] = useState<boolean>(false);
-  const [laatsteGoed, setLaatsteGoed] = useState<boolean | null>(null);
-  const [toonHint, setToonHint] = useState<boolean>(false);
-
-  const juisteKleuren = useMemo(() => {
-    return ronde.opties.filter((kleur) => ronde.juisteIds.includes(kleur.naam));
-  }, [ronde]);
-
-  function toggleSelectie(naam: string) {
-    if (voltooid || laatsteGoed !== null) return;
-
-    setSelecties((vorige) => {
-      if (vorige.includes(naam)) {
-        return vorige.filter((item) => item !== naam);
-      }
-      if (vorige.length >= 2) {
-        return vorige;
-      }
-      return [...vorige, naam];
+  const results = useMemo(() => {
+    return questions.map((q) => {
+      const raw = answers[q.id] ?? "";
+      const normalized = raw.trim().toLowerCase();
+      const correct = q.answers.includes(normalized);
+      return { ...q, userAnswer: raw, correct };
     });
+  }, [answers]);
+
+  const score = results.filter((r) => r.correct).length;
+
+  function handleChange(id, value) {
+    setAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
-  function controleerAntwoord() {
-    if (selecties.length !== 2) {
-      setFeedback("Selecteer precies 2 kleuren.");
-      return;
-    }
-
-    const goed =
-      selecties.every((kleur) => ronde.juisteIds.includes(kleur)) &&
-      ronde.juisteIds.every((kleur) => selecties.includes(kleur));
-
-    setLaatsteGoed(goed);
-
-    if (goed) {
-      const nieuweStreak = streak + 1;
-      setStreak(nieuweStreak);
-
-      if (nieuweStreak >= 3) {
-        setVoltooid(true);
-        setFeedback("Goed gedaan! Je hebt 3 rondes achter elkaar correct behaald en de opdracht voltooid.");
-      } else {
-        setFeedback(`Goed gedaan! Dit was correct. Je hebt nu ${nieuweStreak} van de 3 rondes achter elkaar goed.`);
-      }
-    } else {
-      setStreak(0);
-      setFeedback(
-        `Nog niet goed. De juiste contrasterende kleuren waren ${juisteKleuren.map((kleur) => kleur.naam).join(" en ")}. Je reeks begint weer op 0.`,
-      );
-    }
+  function handleCheck() {
+    setChecked(true);
   }
 
-  function volgendeRonde() {
-    if (voltooid || laatsteGoed === null) return;
-    setRonde(maakRonde());
-    setSelecties([]);
-    setLaatsteGoed(null);
-    setFeedback("");
-    setRondenGespeeld((vorige) => vorige + 1);
+  function handleReset() {
+    setAnswers(Object.fromEntries(questions.map((q) => [q.id, ""])));
+    setChecked(false);
   }
 
-  function opnieuwStarten() {
-    setRonde(maakRonde());
-    setSelecties([]);
-    setFeedback("");
-    setStreak(0);
-    setRondenGespeeld(1);
-    setVoltooid(false);
-    setLaatsteGoed(null);
-    setToonHint(false);
+  function getScoreText(currentScore) {
+    if (currentScore === 5) return "Uitstekend";
+    if (currentScore === 4) return "Goed";
+    if (currentScore === 3) return "Voldoende";
+    return "Nog even oefenen";
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 text-slate-900">
-      <div className="mx-auto max-w-6xl rounded-[28px] bg-white p-7 shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <h1 className="mb-2 text-3xl font-bold leading-tight">Kleurcontrast-trainer</h1>
-            <p className="max-w-2xl text-slate-600">
-              Kies per ronde de 2 kleuren die contrasteren. Haal 3 rondes achter elkaar goed om de opdracht te voltooien.
-            </p>
-          </div>
+    <div className="min-h-screen bg-white p-6 md:p-10">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <h1 className="text-3xl font-bold tracking-tight">Quiz over Napoleon</h1>
+        <p className="mt-3 text-base text-slate-700">
+          Beantwoord de 5 vragen en klik daarna op <strong>Controleer antwoorden</strong>.
+          Je krijgt per vraag feedback te zien.
+        </p>
 
-          <section
-            aria-label="Voortgang"
-            className="grid min-w-[240px] grid-cols-2 gap-3 rounded-[20px] border border-slate-200 bg-slate-50 p-4"
-          >
-            <div>
-              <span className="mb-1 block text-sm text-slate-500">Ronde</span>
-              <div className="text-xl font-bold">{rondenGespeeld}</div>
-            </div>
-            <div>
-              <span className="mb-1 block text-sm text-slate-500">Reeks goed</span>
-              <div className="text-xl font-bold">{streak}/3</div>
-            </div>
-          </section>
-        </div>
+        <div className="mt-8 space-y-6">
+          {results.map((result, index) => (
+            <div key={result.id} className="rounded-2xl border border-slate-200 p-5">
+              <label className="block text-base font-semibold text-slate-900">
+                {index + 1}. {result.question}
+              </label>
 
-        <section className="rounded-[20px] border border-slate-200 bg-slate-50 p-4 leading-relaxed">
-          In elke set staan 5 kleuren. Slechts <strong>2 kleuren</strong> vormen het contrastpaar. Selecteer precies die 2
-          kleuren en controleer daarna je antwoord.
-        </section>
+              <input
+                type="text"
+                value={answers[result.id]}
+                onChange={(e) => handleChange(result.id, e.target.value)}
+                className="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-base outline-none focus:border-slate-500"
+                placeholder="Typ je antwoord hier"
+              />
 
-        <section aria-labelledby="keuzeTitel" className="mt-5">
-          <h2 id="keuzeTitel" className="sr-only">
-            Kies de contrasterende kleuren
-          </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {ronde.opties.map((kleur) => {
-              const geselecteerd = selecties.includes(kleur.naam);
-              const toonResultaat = laatsteGoed !== null;
-              const isJuist = ronde.juisteIds.includes(kleur.naam);
-
-              let ringClass = "ring-transparent";
-              if (geselecteerd) ringClass = "ring-slate-900";
-              if (toonResultaat && isJuist) ringClass = "ring-emerald-500";
-              if (toonResultaat && geselecteerd && !isJuist) ringClass = "ring-red-500";
-
-              return (
-                <button
-                  key={kleur.naam}
-                  type="button"
-                  aria-pressed={geselecteerd}
-                  aria-label={`${kleur.naam}, kleurcode ${kleur.hex}`}
-                  disabled={voltooid || laatsteGoed !== null}
-                  onClick={() => toggleSelectie(kleur.naam)}
-                  className={`flex min-h-[150px] flex-col justify-between rounded-[22px] p-4 text-left text-base font-bold shadow-[0_8px_20px_rgba(15,23,42,0.12)] outline-none ring-4 transition hover:-translate-y-0.5 disabled:cursor-default ${ringClass}`}
-                  style={{ backgroundColor: kleur.hex, color: tekstKleur(kleur.hex) }}
+              {checked && (
+                <div
+                  className={`mt-4 rounded-xl p-4 text-sm leading-6 ${
+                    result.correct
+                      ? "border border-green-200 bg-green-50 text-green-900"
+                      : "border border-red-200 bg-red-50 text-red-900"
+                  }`}
                 >
-                  <span>{kleur.naam}</span>
-                  <span className="text-sm font-medium opacity-90">{kleur.hex}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                  <p className="font-semibold">
+                    {result.correct ? "Goed antwoord" : "Niet goed"}
+                  </p>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+                  {!result.correct && (
+                    <p className="mt-1">
+                      <strong>Juiste antwoord:</strong> {result.correctLabel}
+                    </p>
+                  )}
+
+                  <p className="mt-1">{result.feedback}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
           <button
-            type="button"
-            onClick={controleerAntwoord}
-            disabled={voltooid || laatsteGoed !== null}
-            className="rounded-[18px] bg-slate-900 px-5 py-3 text-base font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-55"
+            onClick={handleCheck}
+            className="rounded-2xl bg-slate-900 px-5 py-3 text-white transition hover:opacity-90"
           >
-            Controleer antwoord
+            Controleer antwoorden
           </button>
           <button
-            type="button"
-            onClick={volgendeRonde}
-            disabled={laatsteGoed === null || voltooid}
-            className="rounded-[18px] border border-slate-300 bg-white px-5 py-3 text-base font-bold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-55"
+            onClick={handleReset}
+            className="rounded-2xl border border-slate-300 px-5 py-3 text-slate-800 transition hover:bg-slate-50"
           >
-            Volgende ronde
-          </button>
-          <button
-            type="button"
-            onClick={opnieuwStarten}
-            className="rounded-[18px] border border-slate-300 bg-white px-5 py-3 text-base font-bold text-slate-900 transition hover:bg-slate-50"
-          >
-            Opnieuw starten
-          </button>
-          <button
-            type="button"
-            aria-expanded={toonHint}
-            aria-controls="hintBox"
-            onClick={() => setToonHint((vorige) => !vorige)}
-            className="rounded-[18px] border border-amber-300 bg-amber-50 px-5 py-3 text-base font-bold text-amber-800 transition hover:bg-amber-100"
-          >
-            {toonHint ? "Verberg hint" : "Toon hint: kleurenwiel"}
+            Opnieuw beginnen
           </button>
         </div>
 
-        {toonHint && (
-          <section id="hintBox" className="mt-5 rounded-[20px] border border-amber-300 bg-amber-50 p-4 leading-relaxed">
-            <h2 className="mb-2 text-lg font-bold">Hint: kleurenwiel</h2>
-            <p>Tegenover elkaar op het kleurenwiel liggen complementaire kleuren. Die geven vaak het sterkste contrast.</p>
-
-            <div className="my-5 flex justify-center">
-              <div
-                className="relative h-[300px] w-[300px] rounded-full border-8 border-white shadow-[0_10px_24px_rgba(15,23,42,0.16)] max-sm:h-[240px] max-sm:w-[240px]"
-                style={{
-                  background:
-                    "conic-gradient(#e53935 0deg 30deg, #f4511e 30deg 60deg, #fb8c00 60deg 90deg, #fdd835 90deg 120deg, #c0ca33 120deg 150deg, #43a047 150deg 180deg, #00897b 180deg 210deg, #1e88e5 210deg 240deg, #3949ab 240deg 270deg, #7e57c2 270deg 300deg, #8e24aa 300deg 330deg, #ec407a 330deg 360deg)",
-                }}
-                aria-hidden="true"
-              >
-                <div className="absolute inset-[22%] rounded-full bg-white shadow-inner" />
-                <WielLabel style={{ left: "50%", top: "7%", color: "#111827" }}>Geel</WielLabel>
-                <WielLabel style={{ left: "78%", top: "16%", color: "#111827" }}>Geeloranje</WielLabel>
-                <WielLabel style={{ left: "92%", top: "50%", color: "#ffffff" }}>Oranje</WielLabel>
-                <WielLabel style={{ left: "78%", top: "82%", color: "#ffffff" }}>Roodoranje</WielLabel>
-                <WielLabel style={{ left: "50%", top: "93%", color: "#ffffff" }}>Rood</WielLabel>
-                <WielLabel style={{ left: "22%", top: "82%", color: "#ffffff" }}>Roodpaars</WielLabel>
-                <WielLabel style={{ left: "8%", top: "50%", color: "#ffffff" }}>Paars</WielLabel>
-                <WielLabel style={{ left: "22%", top: "18%", color: "#ffffff" }}>Blauwpaars</WielLabel>
-                <WielLabel style={{ left: "28%", top: "28%", color: "#ffffff" }}>Blauw</WielLabel>
-                <WielLabel style={{ left: "18%", top: "42%", color: "#ffffff" }}>Blauwgroen</WielLabel>
-                <WielLabel style={{ left: "28%", top: "72%", color: "#ffffff" }}>Groen</WielLabel>
-                <WielLabel style={{ left: "42%", top: "84%", color: "#111827" }}>Geelgroen</WielLabel>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <article className="rounded-[18px] border border-slate-200 bg-white p-4">
-                <h3 className="mb-2 font-bold">Primaire kleuren</h3>
-                <p>Rood, geel en blauw.</p>
-              </article>
-              <article className="rounded-[18px] border border-slate-200 bg-white p-4">
-                <h3 className="mb-2 font-bold">Secundaire kleuren</h3>
-                <p>Oranje, groen en paars.</p>
-              </article>
-              <article className="rounded-[18px] border border-slate-200 bg-white p-4">
-                <h3 className="mb-2 font-bold">Tertiaire kleuren</h3>
-                <p>Geeloranje, roodoranje, roodpaars, blauwpaars, blauwgroen en geelgroen.</p>
-              </article>
-            </div>
-
-            <div className="mt-4 rounded-[18px] border border-slate-200 bg-white p-4">
-              <strong>Voorbeelden van contrastparen:</strong> rood ↔ groen, blauw ↔ oranje, geel ↔ paars.
-            </div>
-          </section>
-        )}
-
-        <section aria-live="polite" className="mt-5 rounded-[20px] border border-slate-200 bg-slate-50 p-4">
-          <h2 className="mb-2 text-lg font-bold">Feedback</h2>
-          <p>{feedback || "Nog geen feedback. Maak je keuze en controleer je antwoord."}</p>
-        </section>
-
-        {voltooid && (
-          <section className="mt-5 rounded-[20px] border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
-            <h2 className="mb-2 text-lg font-bold">Opdracht voltooid</h2>
-            <p>Je hebt 3 rondes achter elkaar goed gedaan. Start opnieuw om verder te oefenen.</p>
-          </section>
+        {checked && (
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <h2 className="text-xl font-semibold">Jouw score</h2>
+            <p className="mt-2 text-base text-slate-800">
+              Je hebt <strong>{score} van de 5</strong> vragen goed.
+            </p>
+            <p className="mt-1 text-slate-700">Beoordeling: {getScoreText(score)}</p>
+          </div>
         )}
       </div>
     </div>
