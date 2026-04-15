@@ -3,188 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Napoleon Bonaparte Quiz</title>
+    <title>Green Design | Color Master Studio</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --primary: #007a33;
+            --primary-light: #8dc63f;
+            --accent: #e9f5db;
+            --dark: #1a1c19;
+            --glass: rgba(255, 255, 255, 0.85);
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
-            padding: 20px;
+            align-items: center;
+            min-height: 100vh;
+            /* Subtiele organische achtergrond */
+            background: radial-gradient(circle at top left, #e0eadd 0%, #f7f9f6 50%, #d8e5d3 100%);
+            color: var(--dark);
+            overflow-x: hidden;
         }
-        .quiz-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 100%;
+
+        /* Glazen container */
+        .app-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            width: 95%;
+            max-width: 500px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin: 20px;
+            position: relative;
+            z-index: 1;
         }
-        h1 {
-            color: #2c3e50;
+
+        header {
             text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            margin-bottom: 30px;
         }
-        .question {
-            margin-top: 25px;
-            font-weight: bold;
-            color: #34495e;
+
+        h1 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin: 0;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
-        .options {
-            margin-top: 10px;
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* De Tuin Progress */
+        .garden-rail {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .pot-slot {
+            width: 65px;
+            height: 65px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: grayscale(1) opacity(0.2);
+            border: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .pot-slot.active {
+            filter: grayscale(0) opacity(1);
+            background: var(--white);
+            box-shadow: 0 10px 20px rgba(141, 198, 63, 0.2);
+            border: 1px solid var(--primary-light);
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        /* Color Display Section */
+        .canvas-section {
+            background: #fff;
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .color-preview {
             display: flex;
             flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
         }
-        label {
-            padding: 10px;
-            background: #ecf0f1;
-            margin-bottom: 5px;
-            border-radius: 5px;
+
+        .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 6px solid #f9f9f9;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: background-color 0.3s ease;
+        }
+
+        .label-small {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+        }
+
+        /* Modern Sliders */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .slider-wrapper {
+            position: relative;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: #eee;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        #r-slider { background: linear-gradient(to right, #f0f0f0, #ff5f5f); }
+        #y-slider { background: linear-gradient(to right, #f0f0f0, #ffdf5f); }
+        #b-slider { background: linear-gradient(to right, #f0f0f0, #5f9fff); }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
             cursor: pointer;
             transition: 0.2s;
         }
-        label:hover {
-            background: #dbe2e3;
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        input[type="radio"] {
-            margin-right: 10px;
+
+        /* Buttons */
+        .action-group {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            margin-top: 35px;
         }
+
         button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 30px;
-            background-color: #3498db;
-            color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 20px;
+            padding: 18px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        button:hover {
-            background-color: #2980b9;
+
+        .btn-secondary {
+            background: #f0f2f0;
+            color: #555;
         }
-        .feedback {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-            font-size: 14px;
+
+        .btn-secondary:hover { background: #e5e8e5; }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 122, 51, 0.2);
         }
-        .correct {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        .btn-primary:hover {
+            background: #00662b;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 122, 51, 0.3);
         }
-        .incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        #final-score {
+
+        /* Feedback Area */
+        #hint-display {
             text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #2c3e50;
+            font-size: 0.9rem;
+            height: 20px;
+            margin-top: 15px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Modal / Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 28, 25, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 40px;
+            padding: 45px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .acc-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 15px 0;
+            letter-spacing: -2px;
+        }
+
+        .modal h2 { margin: 0; font-weight: 800; }
+        .modal p { color: #666; line-height: 1.6; margin-bottom: 25px; }
+
+        /* Plant name Badge */
+        .plant-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
-    <h1>Napoleon Quiz</h1>
-    
-    <div id="quiz-form">
-        <!-- Vraag 1 -->
-        <div class="question">1. Waar werd Napoleon Bonaparte geboren?</div>
-        <div class="options">
-            <label><input type="radio" name="q1" value="A"> Parijs</label>
-            <label><input type="radio" name="q1" value="B"> Corsica</label>
-            <label><input type="radio" name="q1" value="C"> Elba</label>
-        </div>
-        <div id="feedback-q1" class="feedback"></div>
+    <div class="app-card">
+        <header>
+            <h1>Master Mixer</h1>
+            <div class="subtitle">Green Design Edition</div>
+        </header>
 
-        <!-- Vraag 2 -->
-        <div class="question">2. Welke titel nam Napoleon aan in 1804?</div>
-        <div class="options">
-            <label><input type="radio" name="q2" value="A"> Keizer der Fransen</label>
-            <label><input type="radio" name="q2" value="B"> Koning van Frankrijk</label>
-            <label><input type="radio" name="q2" value="C"> President van de Republiek</label>
+        <div class="garden-rail" id="garden">
+            <div class="pot-slot" id="pot-1">🌻</div>
+            <div class="pot-slot" id="pot-2">🌻</div>
+            <div class="pot-slot" id="pot-3">🌻</div>
         </div>
-        <div id="feedback-q2" class="feedback"></div>
 
-        <!-- Vraag 3 -->
-        <div class="question">3. Bij welke beroemde veldslag werd Napoleon definitief verslagen?</div>
-        <div class="options">
-            <label><input type="radio" name="q3" value="A"> De Slag bij Austerlitz</label>
-            <label><input type="radio" name="q3" value="B"> De Slag bij Borodino</label>
-            <label><input type="radio" name="q3" value="C"> De Slag bij Waterloo</label>
+        <div style="text-align: center;">
+            <div class="plant-badge" id="plant-name">Laden...</div>
         </div>
-        <div id="feedback-q3" class="feedback"></div>
 
-        <!-- Vraag 4 -->
-        <div class="question">4. Hoe heette het beroemde burgerlijk wetboek dat hij invoerde?</div>
-        <div class="options">
-            <label><input type="radio" name="q4" value="A"> Magna Carta</label>
-            <label><input type="radio" name="q4" value="B"> Code Napoléon</label>
-            <label><input type="radio" name="q4" value="C"> De Franse Grondwet</label>
+        <div class="canvas-section">
+            <div class="color-preview">
+                <div class="circle" id="target-circle"></div>
+                <div class="label-small">Target</div>
+            </div>
+            <div style="color: #ddd; font-weight: 300; font-size: 1.5rem;">vs</div>
+            <div class="color-preview">
+                <div class="circle" id="user-circle"></div>
+                <div class="label-small">Jouw Mix</div>
+            </div>
         </div>
-        <div id="feedback-q4" class="feedback"></div>
 
-        <!-- Vraag 5 -->
-        <div class="question">5. Op welk eiland stierf Napoleon in ballingschap?</div>
-        <div class="options">
-            <label><input type="radio" name="q5" value="A"> Sint-Helena</label>
-            <label><input type="radio" name="q5" value="B"> Sicilië</label>
-            <label><input type="radio" name="q5" value="C"> Madagaskar</label>
+        <div class="controls">
+            <div class="slider-wrapper">
+                <div class="slider-header">
+                    <span>Rood</span>
+                    <span id="val-r">255</span>
+                </div>
+                <input type="range" id="r-slider" min="0" max="255" value="255">
+            </div>
+            <div class="slider-wrapper">
+                <div class="slider-header">
+                    <span>Geel</span>
+                    <span id="val-y">255</span>
+                </div>
+                <input type="range" id="y-slider" min="0" max="255" value="255">
+            </div>
+            <div class="slider-wrapper">
+                <div class="slider-header">
+                    <span>Blauw</span>
+                    <span id="val-b">255</span>
+                </div>
+                <input type="range" id="b-slider" min="0" max="255" value="255">
+            </div>
         </div>
-        <div id="feedback-q5" class="feedback"></div>
 
-        <button onclick="checkAnswers()">Controleer Antwoorden</button>
+        <div id="hint-display"></div>
+
+        <div class="action-group">
+            <button class="btn-secondary" onclick="provideHint()">Analyse</button>
+            <button class="btn-primary" onclick="evaluateMix()">Check Match</button>
+        </div>
     </div>
 
-    <div id="final-score"></div>
-</div>
+    <!-- Feedback Modal -->
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <span id="modal-icon" style="font-size: 4rem;">🌱</span>
+            <h2 id="modal-title">Resultaat</h2>
+            <div class="acc-number" id="modal-acc">0%</div>
+            <p id="modal-desc"></p>
+            <button class="btn-primary" style="width: 100%;" onclick="closeModal()">Doorgaan</button>
+        </div>
+    </div>
 
-<script>
-    function checkAnswers() {
-        const answers = {
-            q1: { correct: "B", info: "Correct! Hij werd geboren in Ajaccio op het eiland Corsica." },
-            q2: { correct: "A", info: "Inderdaad! Hij kroonde zichzelf tot Keizer in de Notre-Dame." },
-            q3: { correct: "C", info: "Klopt! In 1815 werd hij bij Waterloo verslagen door de Britten en Pruisen." },
-            q4: { correct: "B", info: "Goed! De Code Napoléon vormt nog steeds de basis voor veel Europese rechtssystemen." },
-            q5: { correct: "A", info: "Juist. Hij stierf daar in 1821, ver weg in de Atlantische Oceaan." }
-        };
+    <script>
+        /**
+         * Additieve RYB Logica
+         */
+        function rybToRgb(r, y, b) {
+            r /= 255; y /= 255; b /= 255;
+            const cu = [
+                [0,0,0], [1,0,0.1], [1,1,0], [1,0.5,0],
+                [0.1,0.3,1], [0.6,0,0.8], [0.2,0.9,0.4], [1,1,1]
+            ];
+            const i = (v1, v2, t) => v1 + t * (v2 - v1);
+            const calc = (idx) => {
+                const i00 = i(cu[0][idx], cu[1][idx], r), i01 = i(cu[4][idx], cu[5][idx], r),
+                      i10 = i(cu[2][idx], cu[3][idx], r), i11 = i(cu[6][idx], cu[7][idx], r);
+                return i(i(i00, i10, y), i(i01, i11, y), b);
+            };
+            return `rgb(${Math.round(calc(0)*255)}, ${Math.round(calc(1)*255)}, ${Math.round(calc(2)*255)})`;
+        }
 
-        let score = 0;
+        const plants = [
+            {name: "Olijfgroen (Massa)", r: 128, y: 160, b: 60},
+            {name: "Salie (Bladverf)", r: 160, y: 190, b: 170},
+            {name: "Eucalyptus (Zilver)", r: 180, y: 210, b: 220},
+            {name: "Oud-roze (Roos)", r: 220, y: 140, b: 160},
+            {name: "Okergeel (Herfst)", r: 210, y: 190, b: 40},
+            {name: "Mauve (Najaar)", r: 170, y: 130, b: 190},
+            {name: "Khaki (Stengel)", r: 180, y: 170, b: 120},
+            {name: "Leigrijs (Bestrating)", r: 110, y: 120, b: 130},
+            {name: "Zalmroze (Bloesem)", r: 255, y: 180, b: 140},
+            {name: "Denne-naald (Donker)", r: 40, y: 90, b: 70},
+            {name: "Terracotta (Mat)", r: 190, y: 110, b: 60},
+            {name: "Hortensia (Zachtblauw)", r: 150, y: 170, b: 255},
+            {name: "Mosgroen (Diep)", r: 70, y: 130, b: 50},
+            {name: "Perzik (Detailkleur)", r: 255, y: 210, b: 160},
+            {name: "Sering (Lichtpaars)", r: 200, y: 180, b: 240}
+        ];
 
-        for (let key in answers) {
-            const selected = document.querySelector(`input[name="${key}"]:checked`);
-            const feedbackDiv = document.getElementById(`feedback-${key}`);
+        let available = [];
+        let current = {};
+        let streak = 0;
+
+        function init() {
+            if (available.length === 0) available = [...plants];
+            const idx = Math.floor(Math.random() * available.length);
+            current = available.splice(idx, 1)[0];
+
+            document.getElementById('plant-name').innerText = current.name;
+            document.getElementById('target-circle').style.backgroundColor = rybToRgb(current.r, current.y, current.b);
             
-            feedbackDiv.style.display = "block";
+            // Startpositie: Wit
+            document.getElementById('r-slider').value = 255;
+            document.getElementById('y-slider').value = 255;
+            document.getElementById('b-slider').value = 255;
+            document.getElementById('hint-display').innerText = "";
+            update();
+        }
 
-            if (selected) {
-                if (selected.value === answers[key].correct) {
-                    feedbackDiv.className = "feedback correct";
-                    feedbackDiv.innerHTML = "✅ " + answers[key].info;
-                    score++;
-                } else {
-                    feedbackDiv.className = "feedback incorrect";
-                    feedbackDiv.innerHTML = "❌ Helaas, dat is fout. Het juiste antwoord was " + answers[key].correct + ".";
-                }
+        function update() {
+            const r = document.getElementById('r-slider').value;
+            const y = document.getElementById('y-slider').value;
+            const b = document.getElementById('b-slider').value;
+            document.getElementById('val-r').innerText = r;
+            document.getElementById('val-y').innerText = y;
+            document.getElementById('val-b').innerText = b;
+            document.getElementById('user-circle').style.backgroundColor = rybToRgb(r, y, b);
+        }
+
+        function provideHint() {
+            const r = document.getElementById('r-slider').value;
+            const y = document.getElementById('y-slider').value;
+            const b = document.getElementById('b-slider').value;
+            
+            const dR = current.r - r, dY = current.y - y, dB = current.b - b;
+            const max = Math.max(Math.abs(dR), Math.abs(dY), Math.abs(dB));
+
+            let msg = "";
+            if (max === Math.abs(dR)) msg = dR > 0 ? "Meer Rood nodig" : "Te veel Rood";
+            else if (max === Math.abs(dY)) msg = dY > 0 ? "Voeg Geel toe" : "Minder Geel";
+            else msg = dB > 0 ? "Blauw toevoegen" : "Te veel Blauw";
+            
+            document.getElementById('hint-display').innerText = "💡 " + msg;
+        }
+
+        function evaluateMix() {
+            const r = document.getElementById('r-slider').value;
+            const y = document.getElementById('y-slider').value;
+            const b = document.getElementById('b-slider').value;
+
+            const diff = (Math.abs(current.r - r) + Math.abs(current.y - y) + Math.abs(current.b - b)) / 7.65;
+            const acc = Math.round(100 - diff);
+
+            const overlay = document.getElementById('overlay');
+            const accDisp = document.getElementById('modal-acc');
+            const desc = document.getElementById('modal-desc');
+            const icon = document.getElementById('modal-icon');
+
+            accDisp.innerText = acc + "%";
+
+            if (acc >= 90) {
+                streak++;
+                icon.innerText = "🌸";
+                desc.innerText = "Geweldig! Je hebt een scherp oog voor natuurlijke kleurnuances.";
             } else {
-                feedbackDiv.className = "feedback incorrect";
-                feedbackDiv.innerHTML = "⚠️ Je hebt geen antwoord gekozen.";
+                streak = Math.max(0, streak - 1);
+                icon.innerText = "🥀";
+                desc.innerText = "Niet accuraat genoeg voor een top-ontwerp. Je verliest een plantje.";
+            }
+
+            updateGarden();
+
+            if (streak === 3) {
+                document.getElementById('modal-title').innerText = "COLOR MASTER";
+                icon.innerText = "🏅";
+                desc.innerHTML = "Gefeliciteerd! Je hebt 3 complexe kleuren op rij beheerst.<br>Je wint de gouden medaille!";
+                streak = 0;
+            }
+
+            overlay.style.display = "flex";
+        }
+
+        function updateGarden() {
+            for (let i = 1; i <= 3; i++) {
+                const pot = document.getElementById('pot-' + i);
+                pot.className = i <= streak ? 'pot-slot active' : 'pot-slot';
             }
         }
 
-        const scoreDiv = document.getElementById('final-score');
-        scoreDiv.innerHTML = `Je score: ${score} van de 5`;
-    }
-</script>
+        function closeModal() {
+            document.getElementById('overlay').style.display = "none";
+            init();
+        }
 
+        document.querySelectorAll('input').forEach(i => i.oninput = update);
+        window.onload = init;
+    </script>
 </body>
 </html>
